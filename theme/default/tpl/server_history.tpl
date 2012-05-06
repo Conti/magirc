@@ -1,8 +1,8 @@
-<h1>Server history</h1>
+<h1>{t}Server history{/t}</h1>
 <div id="chart-history" style="height: 350px; min-width: 700px"></div>
 
 {jsmin}
-<script type="text/javascript"><!--
+<script type="text/javascript">
 {literal}
 $(document).ready(function() {
     $.getJSON('rest/denora.php/servers/hourlystats', function(data) {
@@ -13,38 +13,35 @@ $(document).ready(function() {
 				buttons: [{
 					type: 'day',
 					count: 1,
-					text: '1d'
+					text: mLang.zoom_1d
 				},{
 					type: 'week',
 					count: 1,
-					text: '1w'
+					text: mLang.zoom_1w
 				},{
 					type: 'month',
 					count: 1,
-					text: '1m'
+					text: mLang.zoom_1m
 				}, {
 					type: 'month',
 					count: 3,
-					text: '3m'
+					text: mLang.zoom_3m
 				}, {
 					type: 'month',
 					count: 6,
-					text: '6m'
-				}, {
-					type: 'ytd',
-					text: 'YTD'
+					text: mLang.zoom_6m
 				}, {
 					type: 'year',
 					count: 1,
-					text: '1y'
+					text: mLang.zoom_1y
 				}, {
 					type: 'all',
-					text: 'All'
+					text: mLang.zoom_All
 				}],
 				selected: 3
 			},
             series: [{
-                name: 'Servers online',
+                name: mLang.ServersOnline,
                 data: data,
                 step: true,
                 tooltip: { valueDecimals: 0 }
@@ -53,5 +50,5 @@ $(document).ready(function() {
     });
 });
 {/literal}
---></script>
+</script>
 {/jsmin}

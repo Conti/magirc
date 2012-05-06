@@ -7,15 +7,15 @@
  * @copyright   2012 Sebastian Vassiliou
  * @link        http://www.magirc.org/
  * @license     GNU GPL Version 3, see http://www.gnu.org/licenses/gpl-3.0-standalone.html
- * @version     0.7.3
+ * @version     0.8.1
  */
 
 ini_set('display_errors','on');
 error_reporting(E_ALL);
 ini_set('default_charset','UTF-8');
-if (version_compare(PHP_VERSION, '5.3.0', '<') || !extension_loaded('pdo') || !in_array('mysql', PDO::getAvailableDrivers()) || !extension_loaded('gettext') || !extension_loaded('mcrypt') || get_magic_quotes_gpc()) die('ERROR: System requirements not met. Please run <a href="../setup/">Setup</a>.');
-if (!file_exists('../conf/magirc.cfg.php')) die('ERROR: MagIRC is not configured. Please run <a href="../setup/">Setup</a>.');
-if (!is_writable('../tmp/')) die('ERROR: Unable to write temporary files. Please run <a href="../setup/">Setup</a>.');
+if (version_compare(PHP_VERSION, '5.3.0', '<') || !extension_loaded('pdo') || !in_array('mysql', PDO::getAvailableDrivers()) || !extension_loaded('gettext') || !extension_loaded('mcrypt') || get_magic_quotes_gpc()) die('ERROR: System requirements not met. Please run Setup.');
+if (!file_exists('../conf/magirc.cfg.php')) die('ERROR: MagIRC is not configured. Please run Setup.');
+if (!is_writable('../tmp/')) die('ERROR: Unable to write temporary files. Please run Setup.');
 
 session_start();
 
@@ -31,15 +31,15 @@ define('BASE_URL', sprintf("%s://%s%s", @$_SERVER['HTTPS'] ? 'https' : 'http', $
 $admin = new Admin();
 
 try {
-	define('DEBUG', $admin->cfg->getParam('debug_mode'));
-	$admin->tpl->assign('cfg', $admin->cfg->config);
-	if ($admin->cfg->getParam('db_version') < DB_VERSION) die('SQL Config Table is missing or out of date!<br />Please run the <em>MagIRC Installer</em>');
-	if ($admin->cfg->getParam('debug_mode') < 1) {
+	define('DEBUG', $admin->cfg->debug_mode);
+	$admin->tpl->assign('cfg', $admin->cfg);
+	if ($admin->cfg->db_version < DB_VERSION) die('SQL Config Table is missing or out of date!<br />Please run the <em>MagIRC Installer</em>');
+	if ($admin->cfg->debug_mode < 1) {
 		ini_set('display_errors','off');
 		error_reporting(E_ERROR);
 	} else {
 		$admin->tpl->force_compile = true;
-		/*if ($admin->cfg->getParam('debug_mode') > 1) {
+		/*if ($admin->cfg->debug_mode') > 1) {
 			$admin->tpl->debugging = true;
 		}*/
 	}
@@ -52,6 +52,13 @@ try {
 
 	// Handle POST login/logout
 	$admin->slim->post('/login', function() use ($admin) {
+		if ($admin->login($_POST['username'], $_POST['password'])) {
+			$admin->slim->redirect(BASE_URL.'index.php/overview');
+		} else {
+			$admin->slim->redirect(BASE_URL);
+		}
+	});
+	$admin->slim->post('/ajaxlogin', function() use ($admin) {
 		$admin->slim->contentType('application/json');
 		echo json_encode($admin->login($_POST['username'], $_POST['password']));
 	});
@@ -76,7 +83,7 @@ try {
 		if (!$admin->sessionStatus()) { $admin->tpl->display('login.tpl'); exit; }
 		$admin->tpl->assign('section', 'overview');
 		$admin->tpl->assign('setup', file_exists('../setup/'));
-		$admin->tpl->assign('version', array('php' => phpversion(), 'slim' => '1.6.0-develop'));
+		$admin->tpl->assign('version', array('php' => phpversion(), 'slim' => '1.6.2'));
 		$admin->tpl->display('overview.tpl');
 	});
 	$admin->slim->get('/configuration/welcome', function() use ($admin) {
@@ -86,6 +93,11 @@ try {
 	});
 	$admin->slim->get('/configuration/interface', function() use ($admin) {
 		if (!$admin->sessionStatus()) { $admin->slim->halt(403, "HTTP 403 Access Denied"); }
+		$locales = array();
+		foreach (glob("../locale/*") as $filename) {
+			if (is_dir($filename)) $locales[] = basename($filename);
+		}
+		$admin->tpl->assign('locales', $locales);
 		$themes = array();
 		foreach (glob("../theme/*") as $filename) {
 			$themes[] = basename($filename);
@@ -161,11 +173,11 @@ try {
 			$db['hostname'] = (isset($_POST['hostname'])) ? $_POST['hostname'] : $db['hostname'];
 			$db['port'] = (isset($_POST['port'])) ? $_POST['port'] : $db['port'];
 			$db_buffer = "<?php\n".
-				"\$db['username'] = \"{$db['username']}\";\n".
-				"\$db['password'] = \"{$db['password']}\";\n".
-				"\$db['database'] = \"{$db['database']}\";\n".
-				"\$db['hostname'] = \"{$db['hostname']}\";\n".
-				"\$db['port'] = \"{$db['port']}\";\n".
+				"\$db['username'] = '{$db['username']}';\n".
+				"\$db['password'] = '{$db['password']}';\n".
+				"\$db['database'] = '{$db['database']}';\n".
+				"\$db['hostname'] = '{$db['hostname']}';\n".
+				"\$db['port'] = '{$db['port']}';\n".
 				"?>";
 			if (is_writable($db_config_file)) {
 				$writefile = fopen($db_config_file,"w");

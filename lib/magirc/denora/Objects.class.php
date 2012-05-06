@@ -20,6 +20,8 @@ Class Server {
 	public $opers;
 	public $opers_max;
 	public $opers_max_time;
+	public $country;
+	public $country_code;
 
 	function __construct() {
 		$this->online = $this->online == 'Y';
@@ -38,6 +40,8 @@ Class User {
 	public $swhois;
 	public $connect_time;
 	public $server;
+	public $server_country;
+	public $server_country_code;
 	public $away;
 	public $away_msg;
 	public $client;
@@ -59,12 +63,12 @@ Class User {
 	public $operator_level;
 	public $helper;
 	public $bot;
-	
+
 	function __construct() {
 		$this->online = $this->online == 'Y';
 		$this->away = $this->away == 'Y';
 		$this->service = $this->service == 'Y';
-		if (Protocol::host_cloaking && !empty($this->hostname)) $this->hostname = $this->hostname_cloaked;
+		if (Protocol::host_cloaking && !empty($this->hostname_cloaked)) $this->hostname = $this->hostname_cloaked;
 		$this->client_html = Magirc::irc2html($this->client);
 		// User modes
 		for ($j = 97; $j <= 122; $j++) {
@@ -97,17 +101,24 @@ Class User {
 		$this->cmodes = $cmodes ? "+".$cmodes : null;
 		// Futher info
 		$this->bot = $this->hasMode(Protocol::bot_mode);
-		$this->helper = $this->hasMode(Protocol::helper_mode);
-		if (Protocol::ircd == "unreal32") {
-			if ($this->mode_un) $this->operator_level = "Network Admin";
-			elseif ($this->mode_ua) $this->operator_level = "Server Admin";
-			elseif ($this->mode_la) $this->operator_level = "Services Admin";
-			elseif ($this->mode_uc) $this->operator_level = "Co-Admin";
-			elseif ($this->mode_lo) $this->operator_level = "Global Operator";
-		} else {
-			if ($this->mode_lo) $this->operator_level = "Operator";
+		if (!Protocol::oper_hidden_mode || !$this->hasMode(Protocol::oper_hidden_mode)) {
+			$this->helper = $this->hasMode(Protocol::helper_mode);
+			if (Protocol::ircd == "unreal32") {
+				if ($this->mode_un) $this->operator_level = "Network Admin";
+				elseif ($this->mode_ua) $this->operator_level = "Server Admin";
+				elseif ($this->mode_la) $this->operator_level = "Services Admin";
+				elseif ($this->mode_uc) $this->operator_level = "Co-Admin";
+				elseif ($this->mode_lo) $this->operator_level = "Global Operator";
+			} else {
+				if ($this->mode_lo) $this->operator_level = "Operator";
+			}
+			if ($this->operator_level) $this->operator = true;
 		}
-		if ($this->operator_level) $this->operator = true;
+		// Get the server country if user country is local
+		if ($this->country_code == 'local' && $this->server_country_code) {
+			$this->country = $this->server_country;
+			$this->country_code = $this->server_country_code;
+		}
 	}
 
 	private function hasMode($mode) {
@@ -134,7 +145,7 @@ class Channel {
 	public $modes;
 	private $modes_data;
 	public $DT_RowId;
-	
+
 	function __construct() {
 		$this->DT_RowId = $this->channel;
 		$this->topic_html = Magirc::irc2html($this->topic);
@@ -169,7 +180,7 @@ class Channel {
 		if ($this->mode_uj_data) $this->modes_data .= " " . $this->mode_uj_data;
 		if ($this->mode_ul_data) $this->modes_data .= " " . $this->mode_ul_data;
 	}
-	
+
 }
 
 ?>

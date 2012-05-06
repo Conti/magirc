@@ -1,19 +1,19 @@
-<h1>Operators currently online</h1>
+<h1>{t}Operators currently online{/t}</h1>
 <table id="tbl_operators" class="display clickable">
 <thead>
 	<tr>
-		<th>Nickname</th>
-		<th>Server</th>
-		<th>Online since</th>
+		<th>{t}Nickname{/t}</th>
+		<th>{t}Server{/t}</th>
+		<th>{t}Online since{/t}</th>
 	</tr>
 </thead>
 <tbody>
-	<tr><td colspan="3">Loading...</td></tr>
+	<tr><td colspan="3">{t}Loading{/t}...</td></tr>
 </tbody>
 </table>
 
 {jsmin}
-<script type="text/javascript"><!--
+<script type="text/javascript">
 {literal}
 $(document).ready(function() {
 	$('#tbl_operators').dataTable({
@@ -29,9 +29,9 @@ $(document).ready(function() {
 		]
 	});
 	$("#tbl_operators tbody tr").live("click", function() {
-		window.location = url_base + 'user/nick:' + encodeURIComponent(this.id) + '/profile';
+		if (this.id) window.location = url_base + 'user/nick:' + encodeURIComponent(this.id) + '/profile';
 	});
 });
 {/literal}
---></script>
+</script>
 {/jsmin}

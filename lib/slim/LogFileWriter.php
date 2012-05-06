@@ -7,6 +7,7 @@
  * @link        http://www.slimframework.com
  * @license     http://www.slimframework.com/license
  * @version     1.6.0
+ * @package     Slim
  *
  * MIT LICENSE
  *
@@ -38,7 +39,7 @@
  *
  * @package Slim
  * @author  Josh Lockhart
- * @since   1.6.0
+ * @since   1.5.2
  */
 class Slim_LogFileWriter {
     /**
@@ -62,9 +63,10 @@ class Slim_LogFileWriter {
     /**
      * Write message
      * @param   mixed       $message
+     * @param   int         $level
      * @return  int|false
      */
-    public function write( $message ) {
+    public function write( $message, $level = null ) {
         return fwrite($this->resource, (string)$message . PHP_EOL);
     }
 }

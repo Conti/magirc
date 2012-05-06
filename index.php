@@ -7,15 +7,15 @@
  * @copyright   2012 Sebastian Vassiliou
  * @link        http://www.magirc.org/
  * @license     GNU GPL Version 3, see http://www.gnu.org/licenses/gpl-3.0-standalone.html
- * @version     0.7.3
+ * @version     0.8.1
  */
 
 ini_set('display_errors','on');
 error_reporting(E_ALL);
 ini_set('default_charset','UTF-8');
-if (version_compare(PHP_VERSION, '5.3.0', '<') || !extension_loaded('pdo') || !in_array('mysql', PDO::getAvailableDrivers()) || !extension_loaded('gettext') || !extension_loaded('mcrypt') || get_magic_quotes_gpc()) die('ERROR: System requirements not met. Please run <a href="../setup/">Setup</a>.');
-if (!file_exists('conf/magirc.cfg.php')) die('ERROR: MagIRC is not configured. Please run <a href="../setup/">Setup</a>.');
-if (!is_writable('tmp/')) die('ERROR: Unable to write temporary files. Please run <a href="../setup/">Setup</a>.');
+if (version_compare(PHP_VERSION, '5.3.0', '<') || !extension_loaded('pdo') || !in_array('mysql', PDO::getAvailableDrivers()) || !extension_loaded('gettext') || !extension_loaded('mcrypt') || get_magic_quotes_gpc()) die('ERROR: System requirements not met. Please run Setup.');
+if (!file_exists('conf/magirc.cfg.php')) die('ERROR: MagIRC is not configured. Please run Setup.');
+if (!is_writable('tmp/')) die('ERROR: Unable to write temporary files. Please run Setup.');
 
 // load libs
 include_once('lib/magirc/version.inc.php');
@@ -29,19 +29,24 @@ require_once('lib/magirc/denora/Denora.class.php');
 $magirc = new Magirc;
 
 try {
-	define('DEBUG', $magirc->cfg->getParam('debug_mode'));
+	define('DEBUG', $magirc->cfg->debug_mode);
 	define('BASE_URL', sprintf("%s://%s%s", @$_SERVER['HTTPS'] ? 'https' : 'http', $_SERVER['SERVER_NAME'], str_replace('index.php', '', $_SERVER['SCRIPT_NAME'])));
-	$magirc->tpl->template_dir = 'theme/'.$magirc->cfg->getParam('theme').'/tpl';
-	$magirc->tpl->config_dir = 'theme/'.$magirc->cfg->getParam('theme').'/cfg';
-	$magirc->tpl->assign('cfg', $magirc->cfg->config);
-	if ($magirc->cfg->getParam('db_version') < DB_VERSION) die('Upgrade in progress. Please wait a few minutes, thank you.');
+	$magirc->tpl->template_dir = 'theme/'.$magirc->cfg->theme.'/tpl';
+	$magirc->tpl->config_dir = 'theme/'.$magirc->cfg->theme.'/cfg';
+	$magirc->tpl->assign('cfg', $magirc->cfg);
+	$locales = array();
+	foreach (glob("locale/*") as $filename) {
+		if (is_dir($filename)) $locales[] = basename($filename);
+	}
+	$magirc->tpl->assign('locales', $locales);
+	if ($magirc->cfg->db_version < DB_VERSION) die('Upgrade in progress. Please wait a few minutes, thank you.');
 
-	if ($magirc->cfg->getParam('debug_mode') < 1) {
+	if ($magirc->cfg->debug_mode < 1) {
 		ini_set('display_errors','off');
 		error_reporting(E_ERROR);
 	} else {
 		$magirc->tpl->force_compile = true;
-		/*if ($magirc->cfg->getParam('debug_mode') > 1) {
+		/*if ($magirc->cfg->debug_mode') > 1) {
 			$magirc->tpl->debugging = true;
 		}*/
 	}
@@ -61,7 +66,7 @@ try {
 	});
 	$magirc->slim->get('/:section/:target/:action', function($section, $target, $action) use($magirc) {
 		$tpl_file = basename($section) . '_' . basename($action) . '.tpl';
-		$tpl_path = 'theme/' . $magirc->cfg->getParam("theme") . '/tpl/' . $tpl_file;
+		$tpl_path = 'theme/' . $magirc->cfg->theme . '/tpl/' . $tpl_file;
 		if (file_exists($tpl_path)) {
 			$mode = null;
 			if ($section == 'channel') {
@@ -91,7 +96,7 @@ try {
 	});
 	$magirc->slim->get('/:section(/:action)', function($section, $action = 'main') use($magirc) {
 		$tpl_file = basename($section) . '_' . basename($action) . '.tpl';
-		$tpl_path = 'theme/' . $magirc->cfg->getParam("theme") . '/tpl/' . $tpl_file;
+		$tpl_path = 'theme/' . $magirc->cfg->theme . '/tpl/' . $tpl_file;
 		if (file_exists($tpl_path)) {
 			$magirc->tpl->assign('section', $section);
 			$magirc->tpl->display($tpl_file);

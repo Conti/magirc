@@ -7,6 +7,7 @@
  * @link        http://www.slimframework.com
  * @license     http://www.slimframework.com/license
  * @version     1.6.0
+ * @package     Slim
  *
  * MIT LICENSE
  *
@@ -210,7 +211,7 @@ class Slim_Log {
      */
     protected function log( $object, $level ) {
         if ( $this->enabled && $this->writer && $level <= $this->level ) {
-            return $this->writer->write($object);
+            return $this->writer->write($object, $level);
         } else {
             return false;
         }

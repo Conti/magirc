@@ -1,37 +1,38 @@
-<div id="welcome"><h1>{if $cfg.live_interval}Live Network Status{else}Network Status{/if}</h1></div>
+<div id="welcome"><h1>{if $cfg->live_interval}{t}Live Network Status{/t}{else}{t}Network Status{/t}{/if}</h1></div>
 
 <table class="details" style="width:100%;">
 	<tr>
-		<th colspan="2"><h3>Users</h3></th>
-		<th colspan="2"><h3>Channels</h3></th>
-		<th colspan="2"><h3>Operators</h3></th>
-		<th colspan="2"><h3>Servers</h3></th>
+		<th colspan="2"><h3>{t}Servers{/t}</h3></th>
+		<th colspan="2"><h3>{t}Channels{/t}</h3></th>
+		<th colspan="2"><h3>{t}Users{/t}</h3></th>
+		<th colspan="2"><h3>{t}Operators{/t}</h3></th>
 	</tr>
 	<tr>
-		<th>Current:</th><td><span id="net_users" class="val"></span></td>
-		<th>Current:</th><td><span id="net_chans" class="val"></span></td>
-		<th>Current:</th><td><span id="net_opers" class="val"></span></td>
-		<th>Current:</th><td><span id="net_servers" class="val"></span></td>
+		<th>{t}Current{/t}:</th><td><span id="net_servers" class="val"></span></td>
+		<th>{t}Current{/t}:</th><td><span id="net_chans" class="val"></span></td>
+		<th>{t}Current{/t}:</th><td><span id="net_users" class="val"></span></td>
+		<th>{t}Current{/t}:</th><td><span id="net_opers" class="val"></span></td>
 	</tr>
 	<tr>
-		<th>Peak:</th><td><span id="net_users_max" class="val"></span> on <span id="net_users_max_time"></span></td>
-		<th>Peak:</th><td><span id="net_chans_max" class="val"></span> on <span id="net_chans_max_time"></span></td>
-		<th>Peak:</th><td><span id="net_opers_max" class="val"></span> on <span id="net_opers_max_time"></span></td>
-		<th>Peak:</th><td><span id="net_servers_max" class="val"></span> on <span id="net_servers_max_time"></span></td>
+		<th>{t}Peak{/t}:</th><td><span id="net_servers_max" class="val"></span> {t}on{/t} <span id="net_servers_max_time"></span></td>
+		<th>{t}Peak{/t}:</th><td><span id="net_chans_max" class="val"></span> {t}on{/t} <span id="net_chans_max_time"></span></td>
+		<th>{t}Peak{/t}:</th><td><span id="net_users_max" class="val"></span> {t}on{/t} <span id="net_users_max_time"></span></td>
+		<th>{t}Peak{/t}:</th><td><span id="net_opers_max" class="val"></span> {t}on{/t} <span id="net_opers_max_time"></span></td>
 	</tr>
 	<tr>
-		<th>Today:</th><td><span id="net_users_today" class="val"></span> on <span id="net_users_today_time"></span></td>
-		<td colspan="2" rowspan="3">&nbsp;</td>
+		<td colspan="4" rowspan="2">&nbsp;</td>
+		<th>{t}Today{/t}:</th><td><span id="net_users_today" class="val"></span> {t}on{/t} <span id="net_users_today_time"></span></td>
+		<td rowspan="2">&nbsp;</td>
 	</tr>
 </table>
 
 <table>
 	<tr>
-		<td><div id="chart_users" style="height: 175px; width: {if $cfg.service_searchirc}446{else}560{/if}px;"></div></td>
+		<td><div id="chart_line" style="height: 175px; width: {if $cfg->service_searchirc}446{else}560{/if}px;"></div></td>
 		<td><div id="chart_status" style="height: 175px; width: 280px;"></div></td>
-		{if $cfg.service_searchirc}<td style="width: 114px; margin: auto; vertical-align: top; text-align: center;">
+		{if $cfg->service_searchirc}<td style="width: 114px; margin: auto; vertical-align: top; text-align: center;">
 			<img height="40" width="114" border="0" alt="Overall_Ranking" src="http://searchirc.com/img/ranked_logo.gif">
-			<br /><a target="_blank" href="http://searchirc.com/rank/{$cfg.service_searchirc}">{$cfg.net_name}</a>
+			<br /><a target="_blank" href="http://searchirc.com/rank/{$cfg->service_searchirc}">{$cfg->net_name}</a>
 			<br /><span id="searchirc_ranking"></span>
 		</td>{/if}
 	</tr>
@@ -39,22 +40,22 @@
 
 <table class="details" style="width:100%;">
 	<tr>
-		<th style="width:33%;"><h3>Current 10 Biggest Chans</h3></th>
-		<th style="width:33%;"><h3>Top 10 Channels Today</h3></th>
-		<th style="width:33%;"><h3>Top 10 Users Today</h3></th>
+		<th style="width:33%;"><h3>{t}Current 10 Biggest Chans{/t}</h3></th>
+		<th style="width:33%;"><h3>{t}Top 10 Channels Today{/t}</h3></th>
+		<th style="width:33%;"><h3>{t}Top 10 Users Today{/t}</h3></th>
 	</tr>
 	<tr>
 		<td valign="top">
 			<table id="tbl_biggestchans" class="display clickable">
 				<thead>
 					<tr>
-						<th>Channel</th>
-						<th>Users</th>
+						<th>{t}Channel{/t}</th>
+						<th>{t}Users{/t}</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
-						<td colspan="2">Loading...</td>
+						<td colspan="2">{t}Loading{/t}...</td>
 					</tr>
 				</tbody>
 			</table>
@@ -63,13 +64,13 @@
 			<table id="tbl_top10chans" class="display clickable">
 				<thead>
 					<tr>
-						<th>Channel</th>
-						<th>Lines</th>
+						<th>{t}Channel{/t}</th>
+						<th>{t}Lines{/t}</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
-						<td colspan="2">Loading...</td>
+						<td colspan="2">{t}{t}Loading{/t}...{/t}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -78,13 +79,13 @@
 			<table id="tbl_top10users" class="display clickable">
 				<thead>
 					<tr>
-						<th>User</th>
-						<th>Lines</th>
+						<th>{t}User{/t}</th>
+						<th>{t}Lines{/t}</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
-						<td colspan="2">Loading...</td>
+						<td colspan="2">{t}{t}Loading{/t}...{/t}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -92,10 +93,10 @@
 	</tr>
 </table>
 {jsmin}
-<script type="text/javascript"><!--
-var refresh_interval = {$cfg.live_interval};
-var welcome_msg = '{$cfg.welcome_mode}';
-var searchirc = '{$cfg.service_searchirc}';
+<script type="text/javascript">
+var refresh_interval = {$cfg->live_interval};
+var welcome_msg = '{$cfg->welcome_mode}';
+var searchirc = '{$cfg->service_searchirc}';
 {literal}
 $(document).ready(function() {
 	if (welcome_msg == 'statuspage') {
@@ -105,18 +106,18 @@ $(document).ready(function() {
 	}
 	var count = 0;
 
-	var chart_users = new Highcharts.Chart({
-		chart: { type: 'area', renderTo: 'chart_users', events: { load: startCron() } },
+	var chart_line = new Highcharts.Chart({
+		chart: { type: 'line', renderTo: 'chart_line', events: { load: startCron() } },
 		yAxis: { title: { text: null } },
-		series: [{ name: 'Servers', data: initData(), visible:false }, { name: 'Channels', data: initData(), visible:false }, { name: 'Users', data: initData() }, { name: 'Operators', data: initData(), visible:false }],
+		series: [{ name: mLang.Servers, data: initData(), visible:false }, { name: mLang.Channels, data: initData(), visible:false }, { name: mLang.Users, data: initData() }, { name: mLang.Operators, data: initData(), visible:false }],
 		legend: { enabled: true }
 	});
 	var chart_status = new Highcharts.Chart({
 		chart: { renderTo: 'chart_status', type: 'column', events: { load: startCron() } },
-		xAxis: { type: 'linear', categories: [ 'Users', 'Channels', 'Operators', 'Servers' ], labels: { rotation: -45, align: 'right' } },
+		xAxis: { type: 'linear', categories: [ mLang.Servers, mLang.Channels, mLang.Users, mLang.Operators,  ], labels: { rotation: -45, align: 'right' } },
 		yAxis: { min: 0, title: { text: null } },
 		tooltip: { formatter: function() { return '<b>'+ this.x +'</b>: '+ Highcharts.numberFormat(this.y, 0); } },
-		series: [{ name: 'Status', data: [0, 0, 0] }]
+		series: [{ name: mLang.Status, data: [0, 0, 0] }]
 	});
 
 	function startCron() {
@@ -133,11 +134,11 @@ $(document).ready(function() {
 	function updateStatus() {
 		$.getJSON('rest/denora.php/network/status', function(result) {
 			var x = (new Date()).getTime();
-			chart_users.series[0].addPoint([x, result.servers.val], true, true);
-			chart_users.series[1].addPoint([x, result.chans.val], true, true);
-			chart_users.series[2].addPoint([x, result.users.val], true, true);
-			chart_users.series[3].addPoint([x, result.opers.val], true, true);
-			chart_status.series[0].setData([result.users.val, result.chans.val, result.opers.val, result.servers.val]);
+			chart_line.series[0].addPoint([x, result.servers.val], true, true);
+			chart_line.series[1].addPoint([x, result.chans.val], true, true);
+			chart_line.series[2].addPoint([x, result.users.val], true, true);
+			chart_line.series[3].addPoint([x, result.opers.val], true, true);
+			chart_status.series[0].setData([result.servers.val, result.chans.val, result.users.val, result.opers.val ]);
 			$("#net_users").html(result.users.val);
 			if ($("#net_users").html() > $("#net_users_max")) {
 				$("#net_users_max").html(result.users.val);
@@ -186,16 +187,14 @@ $(document).ready(function() {
 		}
 		return data;
 	}
-	$.extend($.fn.dataTable.defaults, {
-        "bProcessing": false,
+	oTable1 = $("#tbl_biggestchans").dataTable({
+		"bProcessing": false,
 		"bFilter": false,
 		"bInfo": false,
 		"bLengthChange": false,
 		"bPaginate": false,
 		"bSort": false,
-		"bEscapeRegex": false
-    });
-	oTable1 = $("#tbl_biggestchans").dataTable({
+		"bEscapeRegex": false,
 		"sAjaxSource": "rest/denora.php/channels/biggest/10?format=datatables",
 		"aoColumns": [
 			{ "mDataProp": "channel", "fnRender": function (oObj) {
@@ -205,10 +204,17 @@ $(document).ready(function() {
 		]
 	});
 	$("#tbl_biggestchans tbody tr").live("click", function(event) {
-		window.location = url_base + 'channel/' + encodeURIComponent(this.id) + '/profile';
+		if (this.id) window.location = url_base + 'channel/' + encodeURIComponent(this.id) + '/profile';
 	});
 	$("#tbl_biggestchans tbody tr a").live("click", function(e) { e.stopPropagation(); });
 	oTable2 = $("#tbl_top10chans").dataTable({
+		"bProcessing": false,
+		"bFilter": false,
+		"bInfo": false,
+		"bLengthChange": false,
+		"bPaginate": false,
+		"bSort": false,
+		"bEscapeRegex": false,
 		"sAjaxSource": "rest/denora.php/channels/top/10?format=datatables",
 		"aoColumns": [
 			{ "mDataProp": "channel", "fnRender": function (oObj) {
@@ -218,10 +224,17 @@ $(document).ready(function() {
 		]
 	});
 	$("#tbl_top10chans tbody tr").live("click", function(event) {
-		window.location = url_base + 'channel/' + encodeURIComponent(this.id) + '/profile#activity';
+		if (this.id) window.location = url_base + 'channel/' + encodeURIComponent(this.id) + '/profile#activity';
 	});
 	$("#tbl_top10chans tbody tr a").live("click", function(e) { e.stopPropagation(); });
 	oTable3 = $("#tbl_top10users").dataTable({
+		"bProcessing": false,
+		"bFilter": false,
+		"bInfo": false,
+		"bLengthChange": false,
+		"bPaginate": false,
+		"bSort": false,
+		"bEscapeRegex": false,
 		"sAjaxSource": "rest/denora.php/users/top/10?format=datatables",
 		"aoColumns": [
 			{ "mDataProp": "uname", "fnRender": function(oObj) {
@@ -231,12 +244,12 @@ $(document).ready(function() {
 		]
 	});
 	$("#tbl_top10users tbody tr").live("click", function(event) {
-		window.location = url_base + 'user/stats:' + encodeURIComponent(this.id) + '/profile';
+		if (this.id) window.location = url_base + 'user/stats:' + encodeURIComponent(this.id) + '/profile';
 	});
 	if (searchirc) {
 		$("#searchirc_ranking").html($(".searchirc6").html());
 	}
 });
 {/literal}
---></script>
+</script>
 {/jsmin}

@@ -22,7 +22,7 @@
 		<h3>Software information</h3>
 		<table>
 			<tr><th style="text-align:right;">MagIRC</th><td style="text-align:left;">{$smarty.const.VERSION_FULL}</td></tr>
-			<tr><th style="text-align:right;">IRCd</th><td style="text-align:left;">{$cfg.ircd_type}</td></tr>
+			<tr><th style="text-align:right;">IRCd</th><td style="text-align:left;">{$cfg->ircd_type}</td></tr>
 			<tr><th style="text-align:right;">PHP</th><td style="text-align:left;">{$version.php}</td></tr>
 			<tr><th style="text-align:right;">Slim Framework</th><td style="text-align:left;">{$version.slim}</td></tr>
 			<tr><th style="text-align:right;">Smarty</th><td style="text-align:left;">{$smarty.version}</td></tr>
@@ -65,11 +65,11 @@
 
 {block name="js" append}
 {jsmin}
-<script type="text/javascript"><!--{literal}
+<script type="text/javascript">{literal}
 $(document).ready(function() {
 	$("button").button();
 });
 {/literal}
---></script>
+</script>
 {/jsmin}
 {/block}

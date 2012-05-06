@@ -66,8 +66,7 @@ class Setup {
 				$status['writable'] = false;
 			}
 		} else {
-			$new = true;
-			if (copy('../conf/magirc.cfg.dist.php', MAGIRC_CFG_FILE)) {
+			if (@copy('../conf/magirc.cfg.dist.php', MAGIRC_CFG_FILE)) {
 				$status['writable'] = true;
 			} else {
 				$status['writable'] = false;
@@ -98,11 +97,11 @@ class Setup {
 		if (isset($_POST['savedb'])) {
 			$db_buffer =
                     "<?php
-	\$db['username'] = \"".$_POST['username']."\";
-	\$db['password'] = \"".$_POST['password']."\";
-	\$db['database'] = \"".$_POST['database']."\";
-	\$db['hostname'] = \"".$_POST['hostname']."\";
-	\$db['port'] = \"".$_POST['port']."\";
+	\$db['username'] = '{$_POST['username']}';
+	\$db['password'] = '{$_POST['password']}';
+	\$db['database'] = '{$_POST['database']}';
+	\$db['hostname'] = '{$_POST['hostname']}';
+	\$db['port'] = '{$_POST['port']}';
 ?>";
 			$this->tpl->assign('db_buffer', $db_buffer);
 			if (is_writable(MAGIRC_CFG_FILE)) {
@@ -156,6 +155,10 @@ class Setup {
 		return true;
 	}
 
+	/**
+	 * Upgrade the MagIRC database
+	 * @return boolean true: updated, false: no update needed
+	 */
 	function configUpgrade() {
 		$version = $this->getDbVersion();
 		$updated = false;
@@ -209,6 +212,10 @@ class Setup {
 			}
 			if ($version < 9) {
 				$this->db->insert('magirc_config', array('parameter' => 'channel_href_show', 'value' => 1));
+				$this->db->insert('magirc_config', array('parameter' => 'denora_version', 'value' => '1.4'));
+			}
+			if ($version < 10) {
+				$this->db->query("ALTER TABLE magirc_config CHANGE value value VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ''");
 			}
 			$this->db->update('magirc_config', array('value' => DB_VERSION), array('parameter' => 'db_version'));
 			$updated = true;

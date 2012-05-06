@@ -1,36 +1,37 @@
-<h1>Netsplit.de Graphs</h1>
+<h1>{t}Netsplit.de Graphs{/t}</h1>
 
 <form>
 	<div id="netsplit_type" class="choser">
-		<input type="radio" id="type0" name="type" checked="checked" /><label for="type0">Last two weeks</label>
-		<input type="radio" id="type1" name="type" /><label for="type1">Last two months</label>
-		<input type="radio" id="type2" name="type" /><label for="type2">Last two years</label>
-		<input type="radio" id="type3" name="type" /><label for="type3">Complete history</label>
+		<input type="radio" id="type0" name="type" checked="checked" /><label for="type0">{t}Last two weeks{/t}</label>
+		<input type="radio" id="type1" name="type" /><label for="type1">{t}Last two months{/t}</label>
+		<input type="radio" id="type2" name="type" /><label for="type2">{t}Last two years{/t}</label>
+		<input type="radio" id="type3" name="type" /><label for="type3">{t}Complete history{/t}</label>
 	</div>
 </form>
 
 <div id="netsplit_normal" style="width:560px; margin:auto;">
-	<h2>Relation of users and channels during the last 2 <span class="netsplit_range">weeks</span></h2>
+	<h2><span id="netsplit_range_relation"></span></h2>
 	<img id="netsplit_relation" src="" alt="" />
-	<h2>Channels during the last 2 <span class="netsplit_range">weeks</span></h2>
+	<h2><span id="netsplit_range_channels"></span></h2>
 	<img id="netsplit_channels" src="" alt="" />
-	<h2>Servers during the last 2 <span class="netsplit_range">weeks</span></h2>
+	<h2><span id="netsplit_range_servers"></span></h2>
 	<img id="netsplit_servers" src="" alt="" />
 </div>
 
 <div id="netsplit_complete" style="width:560px; margin:auto; display:none">
-	<h2>Complete measured history about users and channels</h2>
+	<h2>{t}Complete measured history about users and channels{/t}</h2>
 	<img id="netsplit_history" src="" alt="" />
 </div>
 
-<br />More on <a href="http://irc.netsplit.de/networks/{$cfg.service_netsplit}/" rel="external" target="_blank">Netsplit.de</a>
+<br />{t}More on{/t} <a href="http://irc.netsplit.de/networks/{$cfg->service_netsplit}/" rel="external" target="_blank">Netsplit.de</a>
 
 {jsmin}
-<script type="text/javascript"><!--
-var netsplit = '{$cfg.service_netsplit}';
+<script type="text/javascript">
 {literal}
 $(document).ready(function() {
-	var types_lang = { 'weeks': 'weeks', 'months': 'months', 'years': 'years' };
+	var types_lang_relation = { 'weeks': mLang.NetsplitRelWeeks, 'months': mLang.NetsplitRelMonths, 'years': mLang.NetsplitRelYears };
+	var types_lang_channels = { 'weeks': mLang.NetsplitChanWeeks, 'months': mLang.NetsplitChanMonths, 'years': mLang.NetsplitChanYears };
+	var types_lang_servers = { 'weeks': mLang.NetsplitSrvWeeks, 'months': mLang.NetsplitSrvMonths, 'years': mLang.NetsplitSrvYears };
 	var types = [ 'weeks', 'months', 'years', 'history' ];
 	var type = types[0];
 	$("#netsplit_type").buttonset();
@@ -47,13 +48,15 @@ $(document).ready(function() {
 			$("#netsplit_complete").hide();
 			$("#netsplit_normal").show();
 			$("#netsplit_relation").attr('src', 'http://irc.netsplit.de/tmp/networks/'+type+'_'+netsplit+'_uc.png');
-			$("#netsplit_channels").attr('src', 'http://irc.netsplit.de/tmp/networks/'+type+'_'+netsplit+'_uc.png');
-			$("#netsplit_servers").attr('src', 'http://irc.netsplit.de/tmp/networks/'+type+'_'+netsplit+'_uc.png');
-			$(".netsplit_range").html(types_lang[type]);
+			$("#netsplit_channels").attr('src', 'http://irc.netsplit.de/tmp/networks/'+type+'_'+netsplit+'_c.png');
+			$("#netsplit_servers").attr('src', 'http://irc.netsplit.de/tmp/networks/'+type+'_'+netsplit+'_s.png');
+			$("#netsplit_range_relation").html(types_lang_relation[type]);
+			$("#netsplit_range_relation").html(types_lang_channels[type]);
+			$("#netsplit_range_relation").html(types_lang_servers[type]);
 		}
 	}
 	updateNetsplit(type);
 });
 {/literal}
---></script>
+</script>
 {/jsmin}
