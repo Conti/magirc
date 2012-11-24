@@ -6,7 +6,7 @@
  * @copyright   2011 Josh Lockhart
  * @link        http://www.slimframework.com
  * @license     http://www.slimframework.com/license
- * @version     1.6.0
+ * @version     1.6.7
  * @package     Slim
  *
  * MIT LICENSE
@@ -342,19 +342,13 @@ class Slim_Http_Util {
     public static function parseCookieHeader( $header ) {
         $cookies = array();
         $header = rtrim($header, "\r\n");
-        $headerPieces = preg_split('@\s*;\s*@', $header);
+        $headerPieces = preg_split('@\s*[;,]\s*@', $header);
         foreach ( $headerPieces as $c ) {
             $cParts = explode('=', $c);
             if ( count($cParts) === 2 ) {
                 $key = urldecode($cParts[0]);
                 $value = urldecode($cParts[1]);
-                if ( isset($cookies[$key]) ) {
-                    if ( is_array($cookies[$key]) ) {
-                        $cookies[$key][] = $value;
-                    } else {
-                        $cookies[$key] = array($cookies[$key], $value);
-                    }
-                } else {
+                if ( !isset($cookies[$key]) ) {
                     $cookies[$key] = $value;
                 }
             }

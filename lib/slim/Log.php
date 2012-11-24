@@ -6,7 +6,7 @@
  * @copyright   2011 Josh Lockhart
  * @link        http://www.slimframework.com
  * @license     http://www.slimframework.com/license
- * @version     1.6.0
+ * @version     1.6.7
  * @package     Slim
  *
  * MIT LICENSE
@@ -54,15 +54,21 @@
  * @since   1.0.0
  */
 class Slim_Log {
+    const FATAL = 0;
+    const ERROR = 1;
+    const WARN = 2;
+    const INFO = 3;
+    const DEBUG = 4;
+
     /**
      * @var array
      */
     static protected $levels = array(
-        0 => 'FATAL',
-        1 => 'ERROR',
-        2 => 'WARN',
-        3 => 'INFO',
-        4 => 'DEBUG'
+        self::FATAL => 'FATAL',
+        self::ERROR => 'ERROR',
+        self::WARN =>  'WARN',
+        self::INFO =>  'INFO',
+        self::DEBUG => 'DEBUG'
     );
 
     /**
@@ -88,7 +94,7 @@ class Slim_Log {
     public function __construct( $writer ) {
         $this->writer = $writer;
         $this->enabled = true;
-        $this->level = 4;
+        $this->level = self::DEBUG;
     }
 
     /**
@@ -164,7 +170,7 @@ class Slim_Log {
      * @return  mixed|false     What the Logger returns, or false if Logger not set or not enabled
      */
     public function debug( $object ) {
-        return $this->log($object, 4);
+        return $this->log($object, self::DEBUG);
     }
 
     /**
@@ -173,7 +179,7 @@ class Slim_Log {
      * @return  mixed|false     What the Logger returns, or false if Logger not set or not enabled
      */
     public function info( $object ) {
-        return $this->log($object, 3);
+        return $this->log($object, self::INFO);
     }
 
     /**
@@ -182,7 +188,7 @@ class Slim_Log {
      * @return  mixed|false     What the Logger returns, or false if Logger not set or not enabled
      */
     public function warn( $object ) {
-        return $this->log($object, 2);
+        return $this->log($object, self::WARN);
     }
 
     /**
@@ -191,7 +197,7 @@ class Slim_Log {
      * @return  mixed|false     What the Logger returns, or false if Logger not set or not enabled
      */
     public function error( $object ) {
-        return $this->log($object, 1);
+        return $this->log($object, self::ERROR);
     }
 
     /**
@@ -200,7 +206,7 @@ class Slim_Log {
      * @return  mixed|false     What the Logger returns, or false if Logger not set or not enabled
      */
     public function fatal( $object ) {
-        return $this->log($object, 0);
+        return $this->log($object, self::FATAL);
     }
 
     /**

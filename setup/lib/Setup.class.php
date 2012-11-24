@@ -1,5 +1,27 @@
 <?php
 
+// Database configuration
+class Magirc_DB extends DB {
+	private static $instance = NULL;
+
+	public static function getInstance() {
+		if (is_null(self::$instance) === true) {
+			if (file_exists('../conf/magirc.cfg.php')) {
+				include('../conf/magirc.cfg.php');
+			} else {
+				die ('magirc.cfg.php configuration file missing');
+			}
+			$dsn = "mysql:dbname={$db['database']};host={$db['hostname']}";
+			$args = array();
+			if (isset($db['ssl']) && $db['ssl_key']) $args[PDO::MYSQL_ATTR_SSL_KEY] = $db['ssl_key'];
+			if (isset($db['ssl']) && $db['ssl_cert']) $args[PDO::MYSQL_ATTR_SSL_CERT] = $db['ssl_cert'];
+			if (isset($db['ssl']) && $db['ssl_ca']) $args[PDO::MYSQL_ATTR_SSL_CA] = $db['ssl_ca'];
+			self::$instance = new DB($dsn, $db['username'], $db['password'], $args);
+		}
+		return self::$instance;
+	}
+}
+
 class Setup {
 	public $db;
 	public $tpl;
@@ -11,16 +33,9 @@ class Setup {
 		$this->tpl->cache_dir = 'tmp';
 		$this->tpl->autoload_filters = array('pre' => array('jsmin'));
 		$this->tpl->addPluginsDir('../lib/smarty-plugins/');
-		$this->db = new DB;
 		// We skip db connection in the first steps for check purposes
 		if (@$_GET['step'] > 2) {
-			if (file_exists('../conf/magirc.cfg.php')) {
-				include('../conf/magirc.cfg.php');
-			} else {
-				die ('magirc.cfg.php configuration file missing');
-			}
-			$dsn = "mysql:dbname={$db['database']};host={$db['hostname']}";
-			$this->db->connect($dsn, $db['username'], $db['password']) or die('Error opening MagIRC database<br />'.$this->db->error);
+			$this->db = Magirc_DB::getInstance();
 		}
 	}
 
@@ -95,6 +110,7 @@ class Setup {
 	 */
 	function saveConfig() {
 		if (isset($_POST['savedb'])) {
+			$ssl = isset($_POST['ssl']) ? 'true' : 'false';
 			$db_buffer =
                     "<?php
 	\$db['username'] = '{$_POST['username']}';
@@ -102,6 +118,10 @@ class Setup {
 	\$db['database'] = '{$_POST['database']}';
 	\$db['hostname'] = '{$_POST['hostname']}';
 	\$db['port'] = '{$_POST['port']}';
+	\$db['ssl'] = $ssl;
+	\$db['ssl_key'] = '{$_POST['ssl_key']}';
+	\$db['ssl_cert'] = '{$_POST['ssl_cert']}';
+	\$db['ssl_ca'] = '{$_POST['ssl_ca']}';
 ?>";
 			$this->tpl->assign('db_buffer', $db_buffer);
 			if (is_writable(MAGIRC_CFG_FILE)) {
@@ -165,7 +185,7 @@ class Setup {
 		if ($version != DB_VERSION) {
 			if ($version < 2) {
 				$this->db->insert('magirc_config', array('parameter' => 'live_interval', 'value' => 15));
-				$this->db->insert('magirc_config', array('parameter' => 'cdn_enable', 'value' => 1));
+				$this->db->insert('magirc_config', array('parameter' => 'cdn_enable', 'value' => 0));
 			}
 			if ($version < 3) {
 				$this->db->insert('magirc_config', array('parameter' => 'rewrite_enable', 'value' => 0));
@@ -216,6 +236,13 @@ class Setup {
 			}
 			if ($version < 10) {
 				$this->db->query("ALTER TABLE magirc_config CHANGE value value VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ''");
+			}
+			if ($version < 11) {
+				$base_url = @$_SERVER['HTTPS'] ? 'https://' : 'http://';
+				$base_url .= $_SERVER['SERVER_NAME'];
+				$base_url .= $_SERVER['SERVER_PORT'] == 80 ? '' : ':'.$_SERVER['SERVER_PORT'];
+				$base_url .= str_replace('setup/index.php', '', $_SERVER['SCRIPT_NAME']);
+				$this->db->insert('magirc_config', array('parameter' => 'base_url', 'value' => $base_url));
 			}
 			$this->db->update('magirc_config', array('value' => DB_VERSION), array('parameter' => 'db_version'));
 			$updated = true;

@@ -1,23 +1,41 @@
 <?php
 
+// Database configuration
+class Denora_DB extends DB {
+	private static $instance = NULL;
+
+	public static function getInstance() {
+		if (is_null(self::$instance) === true) {
+			// Check the database configuration
+			$db = null;
+			$error = false;
+			$config_file = PATH_ROOT . 'conf/denora.cfg.php';
+			if (file_exists($config_file)) {
+				include($config_file);
+			} else {
+				$error = true;
+			}
+			if ($error || !is_array($db)) {
+				die('<strong>MagIRC</strong> is not properly configured<br />Please configure the Denora database in the <a href="admin/">Admin Panel</a>');
+			}
+			$dsn = "mysql:dbname={$db['database']};host={$db['hostname']}";
+			$args = array();
+			if (isset($db['ssl']) && $db['ssl_key']) $args[PDO::MYSQL_ATTR_SSL_KEY] = $db['ssl_key'];
+			if (isset($db['ssl']) && $db['ssl_cert']) $args[PDO::MYSQL_ATTR_SSL_CERT] = $db['ssl_cert'];
+			if (isset($db['ssl']) && $db['ssl_ca']) $args[PDO::MYSQL_ATTR_SSL_CA] = $db['ssl_ca'];
+			self::$instance = new DB($dsn, $db['username'], $db['password'], $args);
+			if (self::$instance->error) die('Error opening the Denora database<br />' . self::$instance->error);
+		}
+		return self::$instance;
+	}
+}
+
 class Denora {
 
 	private $db;
 	private $cfg;
 
 	function __construct() {
-		// Check the database configuration
-		$error = false;
-		$config_file = PATH_ROOT . 'conf/denora.cfg.php';
-		if (file_exists($config_file)) {
-			include($config_file);
-		} else {
-			die($config_file);
-			$error = true;
-		}
-		if ($error || !isset($db)) {
-			die('<strong>MagIRC</strong> is not properly configured<br />Please configure the Denora database in the <a href="admin/">Admin Panel</a>');
-		}
 		// Get the ircd
 		$ircd_file = PATH_ROOT . "lib/magirc/denora/protocol/" . IRCD . ".inc.php";
 		if (file_exists($ircd_file)) {
@@ -26,8 +44,7 @@ class Denora {
 			die('<strong>MagIRC</strong> is not properly configured<br />Please configure the ircd in the <a href="admin/">Admin Panel</a>');
 		}
 		// Load the required classes
-		$this->db = new DB();
-		$this->db->connect("mysql:dbname={$db['database']};host={$db['hostname']}", $db['username'], $db['password']) || die('Error opening Denora database<br />' . $this->db->error);
+		$this->db = Denora_db::getInstance();
 		$this->cfg = new Config();
 		require_once(__DIR__ . '/Objects.class.php');
 	}
@@ -219,6 +236,7 @@ class Denora {
 		$clients = array();
 		foreach ($result as $client) {
 			// Determine client name and version
+			$matches = array();
 			preg_match('/^(.*?)\s*(\S*\d\S*)/', str_replace(array('(',')','[',']','{','}'), '', $client['client']), $matches);
 			if (count($matches) == 3) {
 				$name = $matches[1];
@@ -247,6 +265,7 @@ class Denora {
 		});
 		foreach ($clients as $key => $val) {
 			arsort($clients[$key]['versions']);
+			unset($val);
 		}
 
 		// Prepare data for output
@@ -378,8 +397,19 @@ class Denora {
 			$query .= ", s.country AS server_country, s.countrycode AS server_country_code";
 		}
 		$query .= " FROM user u LEFT JOIN server s ON s.servid = u.servid WHERE";
-		if (Protocol::ircd == "unreal32") {
-			$query .= " (u.mode_un = 'Y' OR u.mode_ua = 'Y' OR u.mode_la = 'Y' OR u.mode_uc = 'Y' OR u.mode_lo = 'Y')";
+		$levels = Protocol::$oper_levels;
+		if (!empty($levels)) {
+			$i = 1;
+			$query .= " (";
+			foreach ($levels as $mode => $level) {
+				$mode = Denora::getSqlMode($mode);
+				$query .= "u.$mode = 'Y'";
+				if ($i < count($levels)) {
+					$query .= " OR ";
+				}
+				$i++;
+			}
+			$query .= ")";
 		} else {
 			$query .= " u.mode_lo = 'Y'";
 		}
@@ -400,7 +430,6 @@ class Denora {
 	 * @return array of Channel
 	 */
 	function getChannelList($datatables = false) {
-		$aaData = array();
 		$secret_mode = Protocol::chan_secret_mode;
 		$private_mode = Protocol::chan_private_mode;
 

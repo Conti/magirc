@@ -7,12 +7,14 @@
  * @copyright   2012 Sebastian Vassiliou
  * @link        http://www.magirc.org/
  * @license     GNU GPL Version 3, see http://www.gnu.org/licenses/gpl-3.0-standalone.html
- * @version     0.8.1
+ * @version     0.8.6
  */
 
 ini_set('display_errors','on');
 error_reporting(E_ALL);
 ini_set('default_charset','UTF-8');
+date_default_timezone_set('UTC');
+
 if (version_compare(PHP_VERSION, '5.3.0', '<') || !extension_loaded('pdo') || !in_array('mysql', PDO::getAvailableDrivers()) || !extension_loaded('gettext') || !extension_loaded('mcrypt') || get_magic_quotes_gpc()) die('ERROR: System requirements not met. Please run Setup.');
 if (!file_exists('conf/magirc.cfg.php')) die('ERROR: MagIRC is not configured. Please run Setup.');
 if (!is_writable('tmp/')) die('ERROR: Unable to write temporary files. Please run Setup.');
@@ -30,7 +32,8 @@ $magirc = new Magirc;
 
 try {
 	define('DEBUG', $magirc->cfg->debug_mode);
-	define('BASE_URL', sprintf("%s://%s%s", @$_SERVER['HTTPS'] ? 'https' : 'http', $_SERVER['SERVER_NAME'], str_replace('index.php', '', $_SERVER['SCRIPT_NAME'])));
+	date_default_timezone_set($magirc->cfg->timezone);
+	define('BASE_URL', $magirc->cfg->base_url);
 	$magirc->tpl->template_dir = 'theme/'.$magirc->cfg->theme.'/tpl';
 	$magirc->tpl->config_dir = 'theme/'.$magirc->cfg->theme.'/cfg';
 	$magirc->tpl->assign('cfg', $magirc->cfg);
@@ -51,7 +54,7 @@ try {
 		}*/
 	}
 
-	$magirc->slim->notFound(function () use ($magirc) {
+	$magirc->slim->notFound(function() use ($magirc) {
 		$magirc->tpl->assign('err_msg', 'HTTP 404 - Not Found');
 		$magirc->tpl->assign('err_extra', null);
 		$magirc->tpl->display('error.tpl');

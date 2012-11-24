@@ -4,14 +4,24 @@ define('PATH_ROOT', __DIR__ . '/../../');
 
 // Database configuration
 class Magirc_DB extends DB {
-	function Magirc_DB() {
-		if (file_exists('../conf/magirc.cfg.php')) {
-			include('../conf/magirc.cfg.php');
-		} else {
-			die ('magirc.cfg.php configuration file missing');
+	private static $instance = NULL;
+
+	public static function getInstance() {
+		if (is_null(self::$instance) === true) {
+			if (file_exists('../conf/magirc.cfg.php')) {
+				include('../conf/magirc.cfg.php');
+			} else {
+				die ('magirc.cfg.php configuration file missing');
+			}
+			$dsn = "mysql:dbname={$db['database']};host={$db['hostname']}";
+			$args = array();
+			if (isset($db['ssl']) && $db['ssl_key']) $args[PDO::MYSQL_ATTR_SSL_KEY] = $db['ssl_key'];
+			if (isset($db['ssl']) && $db['ssl_cert']) $args[PDO::MYSQL_ATTR_SSL_CERT] = $db['ssl_cert'];
+			if (isset($db['ssl']) && $db['ssl_ca']) $args[PDO::MYSQL_ATTR_SSL_CA] = $db['ssl_ca'];
+			self::$instance = new DB($dsn, $db['username'], $db['password'], $args);
+			if (self::$instance->error) die('Error opening the MagIRC database<br />' . self::$instance->error);
 		}
-		$dsn = "mysql:dbname={$db['database']};host={$db['hostname']}";
-		$this->connect($dsn, $db['username'], $db['password']) || die('Error opening Magirc database<br />'.$this->error);
+		return self::$instance;
 	}
 }
 
@@ -22,7 +32,7 @@ class Admin {
 	public $cfg;
 
 	function __construct() {
-		$this->db = new Magirc_DB();
+		$this->db = Magirc_DB::getInstance();
 		$this->cfg = new Config();
 		$this->slim = new Slim();
 		$this->tpl = new Smarty();
@@ -34,7 +44,7 @@ class Admin {
 		$this->tpl->autoload_filters = array('pre' => array('jsmin'));
 		$this->tpl->addPluginsDir('../lib/smarty-plugins/');
 		$this->ckeditor = new CKEditor();
-		$this->ckeditor->basePath = BASE_URL.'../js/ckeditor/';
+		$this->ckeditor->basePath = $this->cfg->base_url.'js/ckeditor/';
 		$this->ckeditor->returnOutput = true;
 		$this->ckeditor->config['height'] = 300;
 		$this->ckeditor->config['width'] = 740;

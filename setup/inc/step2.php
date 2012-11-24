@@ -9,14 +9,14 @@ $setup->saveConfig();
 if (file_exists(MAGIRC_CFG_FILE)) {
 	include(MAGIRC_CFG_FILE);
 	if (isset($db) && is_array($db)) {
-		$setup->db->connect("mysql:dbname={$db['database']};host={$db['hostname']}", $db['username'], $db['password']);
+		$setup->db = Magirc_DB::getInstance();
 		$status['error'] = $setup->db->error;
 		$setup->tpl->assign('db_magirc', $db);
 	} else {
 		$status['error'] = "Invalid configuration file";
 	}
 } else {
-	$setup->tpl->assign('db_magirc', array('username' => '', 'password' => '', 'database' => '', 'hostname' => 'localhost', 'port' => 3306));
+	$setup->tpl->assign('db_magirc', array('username' => '', 'password' => '', 'database' => '', 'hostname' => 'localhost', 'port' => 3306, 'ssl' => false, 'ssl_key' => null, 'ssl_cert' => null, 'ssl_ca' => null));
 	$status['error'] = 'new';
 }
 

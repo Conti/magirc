@@ -26,6 +26,7 @@ Class Server {
 	function __construct() {
 		$this->online = $this->online == 'Y';
 		$this->motd_html = $this->motd ? Magirc::irc2html($this->motd) : null;
+		$this->motd = htmlentities($this->motd, ENT_COMPAT, "UTF-8");
 	}
 
 }
@@ -67,9 +68,15 @@ Class User {
 	function __construct() {
 		$this->online = $this->online == 'Y';
 		$this->away = $this->away == 'Y';
+		$this->realname = htmlentities($this->realname, ENT_COMPAT, "UTF-8");
+		$this->swhois = htmlentities($this->swhois, ENT_COMPAT, "UTF-8");
+		$this->away_msg = htmlentities($this->away_msg, ENT_COMPAT, "UTF-8");
+		$this->client_html = $this->client ? Magirc::irc2html($this->client) : null;
+		$this->client = htmlentities($this->client, ENT_COMPAT, "UTF-8");
+		$this->quit_msg = htmlentities($this->quit_msg, ENT_COMPAT, "UTF-8");
 		$this->service = $this->service == 'Y';
 		if (Protocol::host_cloaking && !empty($this->hostname_cloaked)) $this->hostname = $this->hostname_cloaked;
-		$this->client_html = Magirc::irc2html($this->client);
+		
 		// User modes
 		for ($j = 97; $j <= 122; $j++) {
 			$mode_l = 'mode_l'.chr($j);
@@ -103,14 +110,17 @@ Class User {
 		$this->bot = $this->hasMode(Protocol::bot_mode);
 		if (!Protocol::oper_hidden_mode || !$this->hasMode(Protocol::oper_hidden_mode)) {
 			$this->helper = $this->hasMode(Protocol::helper_mode);
-			if (Protocol::ircd == "unreal32") {
-				if ($this->mode_un) $this->operator_level = "Network Admin";
-				elseif ($this->mode_ua) $this->operator_level = "Server Admin";
-				elseif ($this->mode_la) $this->operator_level = "Services Admin";
-				elseif ($this->mode_uc) $this->operator_level = "Co-Admin";
-				elseif ($this->mode_lo) $this->operator_level = "Global Operator";
-			} else {
-				if ($this->mode_lo) $this->operator_level = "Operator";
+			$levels = Protocol::$oper_levels;
+			if (!empty($levels)) {
+				foreach ($levels as $mode => $level) {
+					$mode = Denora::getSqlMode($mode);
+					if ($this->$mode) {
+						$this->operator_level = $level;
+						break;
+					}
+				}
+			} elseif ($this->mode_lo) {
+				$this->operator_level = "Operator";
 			}
 			if ($this->operator_level) $this->operator = true;
 		}
@@ -148,7 +158,8 @@ class Channel {
 
 	function __construct() {
 		$this->DT_RowId = $this->channel;
-		$this->topic_html = Magirc::irc2html($this->topic);
+		$this->topic_html = $this->topic ? Magirc::irc2html($this->topic) : null;
+		$this->topic = htmlentities($this->topic, ENT_COMPAT, "UTF-8");
 		$this->users_max_time = date('Y-m-d H:i:s', $this->users_max_time);
 		// Channel modes
 		for ($j = 97; $j <= 122; $j++) {

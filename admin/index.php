@@ -7,12 +7,14 @@
  * @copyright   2012 Sebastian Vassiliou
  * @link        http://www.magirc.org/
  * @license     GNU GPL Version 3, see http://www.gnu.org/licenses/gpl-3.0-standalone.html
- * @version     0.8.1
+ * @version     0.8.6
  */
 
 ini_set('display_errors','on');
 error_reporting(E_ALL);
 ini_set('default_charset','UTF-8');
+date_default_timezone_set('UTC');
+
 if (version_compare(PHP_VERSION, '5.3.0', '<') || !extension_loaded('pdo') || !in_array('mysql', PDO::getAvailableDrivers()) || !extension_loaded('gettext') || !extension_loaded('mcrypt') || get_magic_quotes_gpc()) die('ERROR: System requirements not met. Please run Setup.');
 if (!file_exists('../conf/magirc.cfg.php')) die('ERROR: MagIRC is not configured. Please run Setup.');
 if (!is_writable('../tmp/')) die('ERROR: Unable to write temporary files. Please run Setup.');
@@ -27,11 +29,12 @@ require_once('../lib/magirc/Config.class.php');
 include_once('../lib/ckeditor/ckeditor.php');
 require_once('lib/Admin.class.php');
 
-define('BASE_URL', sprintf("%s://%s%s", @$_SERVER['HTTPS'] ? 'https' : 'http', $_SERVER['SERVER_NAME'], str_replace('index.php', '', $_SERVER['SCRIPT_NAME'])));
 $admin = new Admin();
 
 try {
+	date_default_timezone_set($admin->cfg->timezone);
 	define('DEBUG', $admin->cfg->debug_mode);
+	define('BASE_URL', $admin->cfg->base_url.basename(__DIR__).'/');
 	$admin->tpl->assign('cfg', $admin->cfg);
 	if ($admin->cfg->db_version < DB_VERSION) die('SQL Config Table is missing or out of date!<br />Please run the <em>MagIRC Installer</em>');
 	if ($admin->cfg->debug_mode < 1) {
@@ -83,7 +86,7 @@ try {
 		if (!$admin->sessionStatus()) { $admin->tpl->display('login.tpl'); exit; }
 		$admin->tpl->assign('section', 'overview');
 		$admin->tpl->assign('setup', file_exists('../setup/'));
-		$admin->tpl->assign('version', array('php' => phpversion(), 'slim' => '1.6.2'));
+		$admin->tpl->assign('version', array('php' => phpversion(), 'slim' => '1.6.5'));
 		$admin->tpl->display('overview.tpl');
 	});
 	$admin->slim->get('/configuration/welcome', function() use ($admin) {
@@ -164,20 +167,29 @@ try {
 			@touch($db_config_file);
 		}
 		if (!$db) {
-			$db = array('username' => 'magirc', 'password' => 'magirc', 'database' => 'magirc', 'hostname' => 'localhost');
+			$db = array('username' => 'magirc', 'password' => 'magirc', 'database' => 'magirc', 'hostname' => 'localhost', 'port' => 3306, 'ssl' => false, 'ssl_key' => null, 'ssl_cert' => null, 'ssl_ca' => null);
 		}
 		if (isset($_POST['database'])) {
+			//TODO: do proper escaping to avoid breaking php code in the config files
 			$db['username'] = (isset($_POST['username'])) ? $_POST['username'] : $db['username'];
 			$db['password'] = (isset($_POST['password'])) ? $_POST['password'] : $db['password'];
 			$db['database'] = (isset($_POST['database'])) ? $_POST['database'] : $db['database'];
 			$db['hostname'] = (isset($_POST['hostname'])) ? $_POST['hostname'] : $db['hostname'];
 			$db['port'] = (isset($_POST['port'])) ? $_POST['port'] : $db['port'];
+			$db['ssl'] = isset($_POST['ssl']) ? 'true' : 'false';
+			$db['ssl_key'] = (isset($_POST['ssl_key'])) ? $_POST['ssl_key'] : $db['ssl_key'];
+			$db['ssl_cert'] = (isset($_POST['ssl_cert'])) ? $_POST['ssl_cert'] : $db['ssl_cert'];
+			$db['ssl_ca'] = (isset($_POST['ssl_ca'])) ? $_POST['ssl_ca'] : $db['ssl_ca'];
 			$db_buffer = "<?php\n".
 				"\$db['username'] = '{$db['username']}';\n".
 				"\$db['password'] = '{$db['password']}';\n".
 				"\$db['database'] = '{$db['database']}';\n".
 				"\$db['hostname'] = '{$db['hostname']}';\n".
 				"\$db['port'] = '{$db['port']}';\n".
+				"\$db['ssl'] = {$db['ssl']};\n".
+				"\$db['ssl_key'] = '{$db['ssl_key']}';\n".
+				"\$db['ssl_cert'] = '{$db['ssl_cert']}';\n".
+				"\$db['ssl_ca'] = '{$db['ssl_ca']}';\n".
 				"?>";
 			if (is_writable($db_config_file)) {
 				$writefile = fopen($db_config_file,"w");
@@ -190,7 +202,7 @@ try {
 	});
 	$admin->slim->get('/support/register', function() use ($admin) {
 		if (!$admin->sessionStatus()) { $admin->slim->halt(403, "HTTP 403 Access Denied"); }
-		$magirc_url = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		$magirc_url = (@$_SERVER['HTTPS'] ? 'https' : 'http') .'://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 		$magirc_url = explode("admin/",$magirc_url);
 		$admin->tpl->assign('magirc_url', $magirc_url[0]);
 		$admin->tpl->display('support_register.tpl');
@@ -205,6 +217,11 @@ try {
 			$admin->tpl->assign('text', "ERROR: Specified documentation file not found");
 		}
 		$admin->tpl->display('support_markdown.tpl');
+	});
+	$admin->slim->get('/admin/list', function() use ($admin) {
+		if (!$admin->sessionStatus()) { $admin->slim->halt(403, "HTTP 403 Access Denied"); }
+		$admins = $admin->db->query("SELECT username, realname, email FROM magirc_admin", SQL_ALL, SQL_ASSOC);
+		echo json_encode(array('aaData' => $admin->db->record));
 	});
 	$admin->slim->get('/:section(/:action)', function($section, $action = 'main') use ($admin) {
 		if (!$admin->sessionStatus()) { $admin->tpl->display('login.tpl'); exit; }

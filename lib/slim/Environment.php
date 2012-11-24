@@ -6,7 +6,7 @@
  * @copyright   2011 Josh Lockhart
  * @link        http://www.slimframework.com
  * @license     http://www.slimframework.com/license
- * @version     1.6.0
+ * @version     1.6.7
  * @package     Slim
  *
  * MIT LICENSE
@@ -62,7 +62,7 @@ class Slim_Environment implements ArrayAccess, IteratorAggregate {
      * Get environment instance (singleton)
      *
      * This creates and/or returns an Environment instance (singleton)
-     * derived from $_SERVER variables. You may override the global server 
+     * derived from $_SERVER variables. You may override the global server
      * variables by using `Environment::mock()` instead.
      *
      * @param   bool            $refresh    Refresh properties using global server variables?
@@ -144,7 +144,7 @@ class Slim_Environment implements ArrayAccess, IteratorAggregate {
                 $env['PATH_INFO'] = substr_replace($env['PATH_INFO'], '', strpos($env['PATH_INFO'], '?')); //query string is not removed automatically
             }
             $env['SCRIPT_NAME'] = rtrim($env['SCRIPT_NAME'], '/');
-            $env['PATH_INFO'] = '/' . ltrim($env['PATH_INFO'], '/');
+            $env['PATH_INFO'] = '/' . ltrim(str_replace('#', '%23', $env['PATH_INFO']), '/'); // Patched by Hal9000 to work with IIS
 
             //The portion of the request URI following the '?'
             $env['QUERY_STRING'] = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : '';

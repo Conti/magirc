@@ -11,6 +11,7 @@
 {block name="css"}
 <link href="css/styles.css" rel="stylesheet" type="text/css" />
 <link href="css/jquery-ui.css" rel="stylesheet" type="text/css" />
+<link href="css/datatables.css" rel="stylesheet" type="text/css" />
 {if $cfg->cdn_enable}
 <link href='http://fonts.googleapis.com/css?family=Share' rel='stylesheet' type='text/css'>
 {else}
@@ -37,11 +38,13 @@
 {/block}
 {block name="js"}
 {if $cfg->cdn_enable}
-<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.19/jquery-ui.min.js"></script>
+<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.23/jquery-ui.min.js"></script>
+<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.3/jquery.dataTables.js"></script>
 {else}
 <script type="text/javascript" src="../js/jquery.min.js"></script>
 <script type="text/javascript" src="../js/jquery-ui.min.js"></script>
+<script type="text/javascript" src="../js/jquery.datatables.min.js"></script>
 {/if}
 <script type="text/javascript" src="../js/jquery.form.js"></script>
 {jsmin}

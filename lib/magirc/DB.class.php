@@ -9,21 +9,23 @@ define('SQL_INIT', 3);
 define('SQL_ASSOC', PDO::FETCH_ASSOC);
 define('SQL_INDEX', PDO::FETCH_NUM);
 define('SQL_OBJ', PDO::FETCH_OBJ);
+define('SQL_NAME', PDO::FETCH_NAMED);
 
 // define the parameter formats
+define('SQL_NULL', PDO::PARAM_NULL);
+define('SQL_BOOL', PDO::PARAM_BOOL);
 define('SQL_INT', PDO::PARAM_INT);
 define('SQL_STR', PDO::PARAM_STR);
 
 class DB {
-
 	private $pdo;
 	private $result;
 	public $error;
 	public $record;
 
-	function __construct() {
-
-	}
+	function __construct($dsn, $username, $password, $args = null) {
+		$this->connect($dsn, $username, $password, $args);
+    }
 
 	function __destruct() {
 		$this->disconnect();
@@ -36,16 +38,30 @@ class DB {
 	 * @param string $password
 	 * @return boolean true: successful, false: failed
 	 */
-	function connect($dsn, $username, $password) {
-		try {
-			$this->pdo = new PDO($dsn, $username, $password);
-			$this->pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
-			$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-			$this->pdo->query("SET NAMES utf8");
-			return true;
-		} catch(PDOException $e) {
-			$this->error = $e->getMessage();
-			return false;
+	function connect($dsn, $username, $password, $args) {
+		$limit = 5;
+		$counter = 0;
+		while (true) {
+			try {
+				$args[PDO::ATTR_PERSISTENT] = true;
+				$this->pdo = new PDO($dsn, $username, $password, $args);
+				$this->pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+				$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+				$this->pdo->query("SET NAMES utf8");
+				return true;
+			} catch (Exception $e) {
+				if($e->getCode() == 2) {
+					$this->pdo = null;
+					$counter++;
+					if ($counter >= $limit) {
+						$this->error = $e->getMessage();
+						return false;
+					}
+				} else {
+					$this->error = $e->getMessage();
+					return false;
+				}
+			}
 		}
 	}
 

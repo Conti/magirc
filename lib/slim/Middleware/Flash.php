@@ -6,7 +6,7 @@
  * @copyright   2011 Josh Lockhart
  * @link        http://www.slimframework.com
  * @license     http://www.slimframework.com/license
- * @version     1.6.0
+ * @version     1.6.7
  * @package     Slim
  *
  * MIT LICENSE
@@ -42,9 +42,9 @@
   *
   * @package    Slim
   * @author     Josh Lockhart
-  * @since      1.5.2
+  * @since      1.6.0
   */
-class Slim_Middleware_Flash extends Slim_Middleware implements ArrayAccess {
+class Slim_Middleware_Flash extends Slim_Middleware implements ArrayAccess, IteratorAggregate {
     /**
      * @var array
      */
@@ -181,5 +181,13 @@ class Slim_Middleware_Flash extends Slim_Middleware implements ArrayAccess {
      */
     public function offsetUnset( $offset ) {
         unset($this->messages['prev'][$offset], $this->messages['now'][$offset]);
+    }
+
+    /**
+     * Iterator Aggregate: Get Iterator
+     */
+    public function getIterator() {
+        $messages = $this->getMessages();
+        return new ArrayIterator($messages);
     }
 }
